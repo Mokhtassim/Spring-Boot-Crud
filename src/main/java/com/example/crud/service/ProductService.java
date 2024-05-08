@@ -1,6 +1,5 @@
 package com.example.crud.service;
 
-import com.example.crud.dto.PageableDto;
 import com.example.crud.dto.ProductDTO;
 import com.example.crud.entity.Product;
 import com.example.crud.exception.ProductException;
@@ -12,9 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -55,27 +52,6 @@ public class ProductService {
         catch(Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting the product.");
         }
-    }
-    public PageableDto<ProductDTO> getProducts(String search, Integer page, Integer size) {
-        int offSet = page * size;
-        List<ProductDTO> result = productMapper.toDto(productRepository.findAll());
-        if(search != null && !search.isBlank())
-        {
-            result = result.stream()
-                           .filter(productDTO -> productDTO.getName().contains(search))
-                           .collect(Collectors.toList());
-        }
-        int totalElements = result.size();
-        int totalPages = (int) Math.ceil((double) totalElements / size);
-        int toIndex = Math.min(offSet + size, totalElements);
-        result = result.subList(offSet, toIndex);
-        return PageableDto.<ProductDTO>builder()
-                            .content(result)
-                            .page(page)
-                            .size(size)
-                            .totalElements(totalElements)
-                            .totalPages(totalPages)
-                            .build();
     }
     public Object updateProduct(ProductDTO productDTO) {
         Optional<Product> product = productRepository.findById(productDTO.getId());
